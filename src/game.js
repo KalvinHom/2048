@@ -34,6 +34,19 @@ class Game {
     window.requestAnimationFrame(this.render.bind(this));
   }
 
+  moveUp() {
+    if (this.board.moveUp()) this.board.newPiece();
+    this.board.draw();
+    window.requestAnimationFrame(this.render.bind(this));
+  }
+
+  moveDown() {
+    console.log("moveRight!!");
+    if (this.board.moveDown()) this.board.newPiece();
+    this.board.draw();
+    window.requestAnimationFrame(this.render.bind(this));
+  }
+
   tick() {
     const elapsed = Date.now() - this.lastRenderTime;
 

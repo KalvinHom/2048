@@ -29,6 +29,17 @@ window.addEventListener("keydown", function (event) {
       game.moveRight();
       break;
 
+    case "ArrowUp":
+    case "w":
+      console.log("moving up");
+      game.moveUp();
+      break;
+    case "ArrowDown":
+    case "s":
+      console.log("moving down");
+      game.moveDown();
+      break;
+
     default:
       fired = false;
 

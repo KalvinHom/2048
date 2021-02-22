@@ -3,6 +3,8 @@ const HEIGHT = 4;
 const CELL_SIZE = 100;
 
 const NEW_TILE = -1;
+const MOVE = 1;
+const MERGE = 2;
 class Board {
   constructor() {
     this.board = Array(HEIGHT)
@@ -11,12 +13,21 @@ class Board {
 
     this.actions = Array(HEIGHT)
       .fill()
-      .map(() => Array(WIDTH).fill(0));
+      .map(() =>
+        Array(WIDTH)
+          .fill()
+          .map((x) => ({ action: 0 }))
+      );
 
     this.canvas = document.querySelector("canvas.board");
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
     this.context = this.canvas.getContext("2d");
+    this.numTranslate = 0;
+    this.ready = true;
+  }
+  beginTurn() {
+    this.ready = false;
   }
 
   newPiece() {
@@ -28,33 +39,33 @@ class Board {
 
     const rand = Math.floor(Math.random() * 10);
     this.board[y][x] = rand == 0 ? 4 : 2;
-    this.actions[y][x] = NEW_TILE;
-    console.log(this.actions[y][x]);
-    console.log(this.actions);
+    this.actions[y][x].action = NEW_TILE;
+    console.log(`new piece at ${x}, ${y}`);
   }
 
-  //TODO: combine left/right/up/down when not lazy
+  //TODO: combine left/right/up/down when not being lazy with copy paste
   moveLeft() {
     let validMove = false;
     for (let y = 0; y < HEIGHT; y++) {
       for (let x = 0; x < WIDTH; x++) {
-        console.log(`evaluating ${x}, ${y}`);
-        console.log(`current value is ${this.board[y][x]}`);
         const nextVal = this.getNextValue(x + 1, y, 1);
-        console.log(`closet value is at ${nextVal}: ${this.board[y][nextVal]}`);
+
         if (nextVal == -1) break;
 
         if (this.board[y][x] == 0) {
-          console.log("nextVal: " + nextVal);
           validMove = true;
           this.board[y][x] = this.board[y][nextVal];
           this.board[y][nextVal] = 0;
+          this.actions[y][nextVal].action = MOVE;
+          this.actions[y][nextVal].translate = [x - nextVal, 0];
           x--;
         } else if (this.board[y][x] == this.board[y][nextVal]) {
           validMove = true;
 
           this.board[y][x] *= 2;
           this.board[y][nextVal] = 0;
+          this.actions[y][nextVal].action = MERGE;
+          this.actions[y][nextVal].translate = [x - nextVal, 0];
         }
       }
     }
@@ -63,28 +74,28 @@ class Board {
 
   moveRight() {
     let validMove = false;
-    console.log("moveRight");
+
     for (let y = 0; y < HEIGHT; y++) {
       for (let x = WIDTH - 1; x >= 0; x--) {
-        console.log(`evaluating ${x}, ${y}`);
-        console.log(`current value is ${this.board[y][x]}`);
         const nextVal = this.getNextValue(x - 1, y, -1);
-        console.log(`closet value is at ${nextVal}: ${this.board[y][nextVal]}`);
 
-        console.log(`${x}, ${y}`);
         if (nextVal == -1) break;
 
         if (this.board[y][x] == 0) {
-          console.log("nextVal: " + nextVal);
           validMove = true;
           this.board[y][x] = this.board[y][nextVal];
           this.board[y][nextVal] = 0;
+          this.actions[y][nextVal].action = MOVE;
+          this.actions[y][nextVal].translate = [x - nextVal, 0];
+
           x++;
         } else if (this.board[y][x] == this.board[y][nextVal]) {
           validMove = true;
 
           this.board[y][x] *= 2;
           this.board[y][nextVal] = 0;
+          this.actions[y][nextVal].action = MERGE;
+          this.actions[y][nextVal].translate = [x - nextVal, 0];
         }
       }
     }
@@ -96,19 +107,23 @@ class Board {
     for (let x = 0; x < WIDTH; x++) {
       for (let y = 0; y < HEIGHT; y++) {
         const nextVal = this.getNextYValue(x, y + 1, 1);
-        console.log("nextVal: " + nextVal);
+
         if (nextVal == -1) break;
 
         if (this.board[y][x] == 0) {
           validMove = true;
           this.board[y][x] = this.board[nextVal][x];
           this.board[nextVal][x] = 0;
+          this.actions[nextVal][x].action = MOVE;
+          this.actions[nextVal][x].translate = [0, y - nextVal];
           y--;
         } else if (this.board[y][x] == this.board[nextVal][x]) {
           validMove = true;
 
           this.board[y][x] *= 2;
           this.board[nextVal][x] = 0;
+          this.actions[nextVal][x].action = MERGE;
+          this.actions[nextVal][x].translate = [0, y - nextVal];
         }
       }
     }
@@ -117,25 +132,27 @@ class Board {
 
   moveDown() {
     let validMove = false;
-    console.log("moveRight");
+
     for (let x = 0; x < WIDTH; x++) {
       for (let y = HEIGHT - 1; y >= 0; y--) {
         const nextVal = this.getNextYValue(x, y - 1, -1);
-        console.log("nextVal: " + nextVal);
+
         if (nextVal == -1) break;
 
-        console.log(`${x}, ${y}`);
         if (this.board[y][x] == 0) {
           validMove = true;
           this.board[y][x] = this.board[nextVal][x];
           this.board[nextVal][x] = 0;
-          this.actions[y][x] = [0, y - nextVal];
+          this.actions[nextVal][x].action = MOVE;
+          this.actions[nextVal][x].translate = [0, y - nextVal];
           y++;
         } else if (this.board[y][x] == this.board[nextVal][x]) {
           validMove = true;
 
           this.board[y][x] *= 2;
           this.board[nextVal][x] = 0;
+          this.actions[nextVal][x].action = MERGE;
+          this.actions[nextVal][x].translate = [0, y - nextVal];
         }
       }
     }
@@ -173,34 +190,81 @@ class Board {
   }
   draw() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    console.log("beginning board draw");
     console.log(this.actions);
+    var actionOccurred = false;
     for (let y = 0; y < HEIGHT; y++) {
       for (let x = 0; x < WIDTH; x++) {
         var content =
           this.board[y][x] == 0
             ? ""
-            : `<div class="${this.style(y, x)}">${this.board[y][x]}</div>`;
+            : `<div class="tile ${this.style(y, x)}">${this.board[y][x]}</div>`;
+
+        if (
+          this.actions[y][x].action != 0 &&
+          this.actions[y][x].action != NEW_TILE
+        ) {
+          actionOccurred = true;
+          document
+            .getElementsByClassName("grid-row")
+            [y].getElementsByClassName("grid-cell")
+            [x].getElementsByClassName(
+              "tile"
+            )[0].style.transform = `translate(${
+            this.actions[y][x].translate[0] * 106.25 +
+            15 * this.actions[y][x].translate[0]
+          }px, ${
+            this.actions[y][x].translate[1] * 106.25 +
+            15 * this.actions[y][x].translate[1]
+          }px)`;
+          this.numTranslate++;
+          this.transitioning = true;
+          console.log(`added numTranslate:${this.numTranslate}`);
+          var base = this;
+          $(".normal").each(function () {
+            this.addEventListener("transitionend", function handler(e) {
+              console.log(e.currentTarget);
+              e.currentTarget.removeEventListener(e.type, handler);
+              base.completeTransitions();
+            });
+          });
+        }
+      }
+    }
+    if (!actionOccurred) {
+      this.drawBoard();
+      this.ready = true;
+    }
+  }
+
+  drawBoard() {
+    for (let y = 0; y < HEIGHT; y++) {
+      for (let x = 0; x < WIDTH; x++) {
+        var color =
+          this.board[y][x] == 0 ? "" : 255 - Math.log2(this.board[y][x]) * 10;
+        var content =
+          this.board[y][x] == 0
+            ? ""
+            : `<div class="tile ${this.style(
+                y,
+                x
+              )}" style="background: rgb(255, ${color}, ${color})
+            ">${this.board[y][x]}</div>`;
+
         document
           .getElementsByClassName("grid-row")
           [y].getElementsByClassName("grid-cell")[x].innerHTML = content;
-
-        document
-          .getElementsByClassName("grid-row")
-          [y].getElementsByClassName("grid-cell")[x].style.transform =
-          "translate(25px, 0px)";
-        this.context.font = "40px serif";
-
-        document
-          .getElementsByClassName("grid-row")
-          [y].getElementsByClassName("grid-cell")[x];
-        this.context.fillText(
-          this.board[y][x],
-          50 + x * CELL_SIZE,
-          50 + y * CELL_SIZE
-        );
+        this.actions[y][x].action = 0;
       }
-      this.actions[y].fill(0);
-      console.log(this.actions[y]);
+    }
+  }
+
+  completeTransitions() {
+    if (this.transitioning) {
+      console.log(`complete transition`);
+      this.drawBoard();
+      this.ready = true;
+      this.transitioning = false;
     }
   }
 }

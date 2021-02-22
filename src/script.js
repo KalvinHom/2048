@@ -13,30 +13,30 @@ game.startGame();
 
 let fired = false;
 window.addEventListener("keydown", function (event) {
+  event.preventDefault();
   if (fired) return;
+
+  if (!game.isReady()) return;
+
   fired = true;
   event.key;
   event.preventDefault();
   switch (event.key) {
     case "ArrowLeft":
     case "a":
-      console.log("moving left");
       game.moveLeft();
       break;
     case "ArrowRight":
     case "d":
-      console.log("moving right");
       game.moveRight();
       break;
 
     case "ArrowUp":
     case "w":
-      console.log("moving up");
       game.moveUp();
       break;
     case "ArrowDown":
     case "s":
-      console.log("moving down");
       game.moveDown();
       break;
 

@@ -5,7 +5,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
-  "homepage": "http://kalvinhom.github.io/tetris-js/",
+  "homepage": "http://kalvinhom.github.io/game-2048/",
   "dependencies": {
     "@babel/core": "^7.12.10",
     "@babel/preset-env": "^7.12.11",

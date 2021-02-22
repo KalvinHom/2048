@@ -14,45 +14,38 @@ class Game {
     this.canvas = new Canvas();
   }
 
+  isReady() {
+    return this.board.ready;
+  }
   startGame() {
     this.lastRenderTime = Date.now();
     this.board.newPiece();
     this.board.newPiece();
+    // this.board.draw();
+    this.board.drawBoard();
   }
 
   moveLeft() {
+    this.board.beginTurn();
     if (this.board.moveLeft()) this.board.newPiece();
     this.board.draw();
   }
 
   moveRight() {
-    console.log("moveRight!!");
+    this.board.beginTurn();
     if (this.board.moveRight()) this.board.newPiece();
     this.board.draw();
   }
 
   moveUp() {
+    this.board.beginTurn();
     if (this.board.moveUp()) this.board.newPiece();
     this.board.draw();
   }
 
   moveDown() {
-    console.log("moveRight!!");
+    this.board.beginTurn();
     if (this.board.moveDown()) this.board.newPiece();
-    this.board.draw();
-  }
-
-  // tick() {
-  //   const elapsed = Date.now() - this.lastRenderTime;
-
-  //   if (elapsed > 1000) {
-  //     this.render();
-  //     this.lastRenderTime = Date.now();
-  //   }
-  //   window.requestAnimationFrame(this.tick.bind(this));
-  // }
-
-  render() {
     this.board.draw();
   }
 }

@@ -10,7 +10,7 @@ module.exports = merge([
   },
   {
     output: {
-      publicPath: "/tetris-js/",
+      publicPath: "/game-2048/",
     },
   },
 ]);

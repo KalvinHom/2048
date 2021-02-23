@@ -19,12 +19,9 @@ class Board {
           .map((x) => ({ action: 0 }))
       );
 
-    this.canvas = document.querySelector("canvas.board");
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
-    this.context = this.canvas.getContext("2d");
     this.numTranslate = 0;
     this.ready = true;
+    this.score = 0;
   }
   beginTurn() {
     this.ready = false;
@@ -66,6 +63,7 @@ class Board {
           this.board[y][nextVal] = 0;
           this.actions[y][nextVal].action = MERGE;
           this.actions[y][nextVal].translate = [x - nextVal, 0];
+          this.score += this.board[y][x];
         }
       }
     }
@@ -96,6 +94,7 @@ class Board {
           this.board[y][nextVal] = 0;
           this.actions[y][nextVal].action = MERGE;
           this.actions[y][nextVal].translate = [x - nextVal, 0];
+          this.score += this.board[y][x];
         }
       }
     }
@@ -124,6 +123,7 @@ class Board {
           this.board[nextVal][x] = 0;
           this.actions[nextVal][x].action = MERGE;
           this.actions[nextVal][x].translate = [0, y - nextVal];
+          this.score += this.board[y][x];
         }
       }
     }
@@ -153,6 +153,7 @@ class Board {
           this.board[nextVal][x] = 0;
           this.actions[nextVal][x].action = MERGE;
           this.actions[nextVal][x].translate = [0, y - nextVal];
+          this.score += this.board[y][x];
         }
       }
     }
@@ -184,12 +185,11 @@ class Board {
   }
 
   style(y, x) {
-    if (this.actions[y][x] == NEW_TILE) return "new-tile";
+    if (this.actions[y][x].action == NEW_TILE) return "new-tile";
 
     return "normal";
   }
   draw() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     console.log("beginning board draw");
     console.log(this.actions);
     var actionOccurred = false;
@@ -221,7 +221,7 @@ class Board {
           this.transitioning = true;
           console.log(`added numTranslate:${this.numTranslate}`);
           var base = this;
-          $(".normal").each(function () {
+          $(".tile").each(function () {
             this.addEventListener("transitionend", function handler(e) {
               console.log(e.currentTarget);
               e.currentTarget.removeEventListener(e.type, handler);
@@ -255,6 +255,7 @@ class Board {
           .getElementsByClassName("grid-row")
           [y].getElementsByClassName("grid-cell")[x].innerHTML = content;
         this.actions[y][x].action = 0;
+        document.getElementById("score-counter").innerHTML = this.score;
       }
     }
   }

@@ -1,5 +1,5 @@
 .grid-container {
-  position: absolute;
+  min-width: 500px;
   z-index: 1;
 }
 
@@ -32,7 +32,8 @@
 }
 
 .new-tile {
-  animation: appear 200ms ease 100ms;
+  animation: appear 200ms ease 50ms;
+  animation: border 200ms ease 50ms;
 
   animation-fill-mode: both;
 }
@@ -46,53 +47,21 @@
   text-align: center;
 }
 
-.tile-2 {
-  background: rgb(255, 255, 190);
-}
-.tile-4 {
-  background: rgb(255, 225, 140);
-}
-
-.tile-8 {
-  background: rgb(255, 200, 120);
-}
-
-.tile-16 {
-  background: rgb(255, 180, 100);
+.score {
+  margin-top: 30px;
+  margin-left: 40px;
+  background: lightgray;
+  text-align: center;
+  font-weight: bold;
+  padding: 12px;
+  height: 100px;
+  width: 200px;
+  border-radius: 25px;
 }
 
-.tile-32 {
-  background: rgb(255, 160, 80);
-}
-
-.tile-64 {
-  background: rgb(255, 140, 70);
-}
-
-.tile-128 {
-  background: rgb(255, 100, 60);
-}
-
-.tile-256 {
-  background: rgb(255, 80, 50);
-}
-.tile-512 {
-  background: rgb(255, 60, 40);
-}
-.tile-1024 {
-  background: rgb(255, 50, 30);
-}
-
-.tile-2048 {
-  background: rgb(255, 40, 20);
-}
-
-.tile-4096 {
-  background: rgb(255, 20, 10);
-}
-
-.tile-8192 {
-  background: rgb(255, 0, 0);
+#score-counter {
+  margin-top: 20px;
+  font-size: 40px;
 }
 
 @keyframes appear {
@@ -102,6 +71,20 @@
 
   100% {
     opacity: 1;
+  }
+}
+
+@keyframes border {
+  0% {
+    border-style: solid;
+    border-color: rgba(255, 0, 0, 0.1);
+    border-width: 5px;
+  }
+
+  100% {
+    border-style: solid;
+    border-color: rgba(255, 0, 0, 0.1);
+    border-width: 0px;
   }
 }
 

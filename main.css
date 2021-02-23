@@ -41,7 +41,7 @@
   width: 106.25px;
   height: 106.25px;
   transition-property: transform;
-  transition-duration: 0.25s;
+  transition-duration: 0.1s;
   line-height: 2.5;
   text-align: center;
 }
